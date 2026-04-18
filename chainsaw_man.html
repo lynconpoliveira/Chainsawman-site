@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHAINSAW MAN — チェンソーマン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Zen+Dots&family=Noto+Serif+JP:wght@300;400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --r:#c0392b;--rd:#7b1a12;--rg:#e8503a;--rgg:#ff6b52;
+  --y:#f2c94c;--yd:#c9a227;
+  --bg:#080808;--bg2:#0f0f0f;--bg3:#161616;--bg4:#1e1e1e;
+  --t:#f0ebe2;--t2:rgba(240,235,226,0.65);--t3:rgba(240,235,226,0.3);
+  --border:rgba(192,57,43,0.25);
+  --font-head:'Black Han Sans',sans-serif;
+  --font-jp:'Noto Serif JP',serif;
+  --font-mono:'Share Tech Mono',monospace;
+  --font-zen:'Zen Dots',cursive;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--t);
+  font-family:var(--font-jp);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--r);border-radius:2px}
+
+/* CURSOR */
+#cur{
+  position:fixed;z-index:99999;pointer-events:none;
+  width:14px;height:14px;
+  background:var(--rg);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:difference;
+  transition:transform .1s,width .2s,height .2s;
+}
+#cur2{
+  position:fixed;z-index:99998;pointer-events:none;
+  width:36px;height:36px;
+  border:1.5px solid rgba(232,80,58,0.5);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  transition:left .12s ease-out,top .12s ease-out,transform .2s;
+}
+body:has(a:hover) #cur,body:has(button:hover) #cur{width:22px;height:22px}
+
+/* NOISE OVERLAY */
+#noise{
+  position:fixed;inset:0;z-index:9997;pointer-events:none;opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:.9rem 3rem;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(8,8,8,0);
+  border-bottom:1px solid rgba(192,57,43,0);
+  transition:background .4s,border-color .4s;
+}
+nav.scrolled{
+  background:rgba(8,8,8,.92);
+  border-color:var(--border);
+  backdrop-filter:blur(16px);
+}
+.nav-logo{
+  font-family:var(--font-zen);
+  font-size:1rem;
+  color:var(--rg);
+  letter-spacing:4px;
+  text-shadow:0 0 20px rgba(232,80,58,.6);
+}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{
+  color:var(--t3);
+  text-decoration:none;
+  font-family:var(--font-mono);
+  font-size:.75rem;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  position:relative;
+  transition:color .2s;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;
+  background:var(--rg);transition:width .3s;
+}
+.nav-links a:hover{color:var(--t)}.nav-links a:hover::after{width:100%}
+
+/* ============ HERO ============ */
+#hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 100% 80% at 50% 60%,rgba(139,0,0,.4) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 40% at 20% 20%,rgba(192,57,43,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 30% 50% at 80% 80%,rgba(192,57,43,.06) 0%,transparent 60%);
+}
+/* Scanlines */
+.scanlines{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.15) 2px,rgba(0,0,0,.15) 4px);
+}
+/* Hero diagonal slash */
+.hero-slash{
+  position:absolute;
+  width:3px;height:120%;
+  background:linear-gradient(to bottom,transparent,var(--r),transparent);
+  opacity:.3;
+  transform:rotate(-15deg);
+}
+.hero-slash:nth-child(1){left:20%}
+.hero-slash:nth-child(2){left:50%;opacity:.15}
+.hero-slash:nth-child(3){right:20%}
+
+/* Big chainsaw SVG bg */
+.chainsaw-bg-svg{
+  position:absolute;right:-5%;bottom:-5%;
+  width:min(600px,80vw);opacity:.04;
+  animation:slowspin 30s linear infinite;
+}
+@keyframes slowspin{to{transform:rotate(360deg)}}
+
+.hero-jp{
+  font-family:var(--font-jp);
+  font-weight:900;
+  font-size:clamp(.7rem,1.5vw,1rem);
+  letter-spacing:16px;
+  color:var(--r);
+  text-transform:uppercase;
+  margin-bottom:1.2rem;
+  animation:fadeUp .8s ease both;
+}
+.hero-title{
+  font-family:var(--font-head);
+  font-size:clamp(5rem,15vw,13rem);
+  line-height:.82;
+  text-align:center;
+  position:relative;z-index:3;
+  animation:fadeUp .8s .1s ease both;
+}
+.hero-title .line1{
+  display:block;
+  color:var(--t);
+  text-shadow:0 0 80px rgba(192,57,43,.5);
+  -webkit-text-stroke:1px rgba(240,235,226,.1);
+}
+.hero-title .line2{
+  display:block;
+  color:transparent;
+  -webkit-text-stroke:2px var(--r);
+  text-shadow:0 0 60px rgba(232,80,58,.3);
+}
+.hero-title .line3{
+  display:block;
+  font-size:clamp(2rem,5vw,4.5rem);
+  color:var(--r);
+  letter-spacing:8px;
+  text-shadow:0 0 40px rgba(232,80,58,.8);
+}
+
+.hero-sub-row{
+  display:flex;align-items:center;gap:2rem;margin-top:2rem;
+  font-family:var(--font-mono);font-size:.75rem;
+  color:var(--t3);letter-spacing:3px;
+  animation:fadeUp .8s .3s ease both;
+  z-index:3;
+}
+.hero-sub-row span{color:var(--r)}
+
+.hero-cta{
+  margin-top:3rem;
+  display:flex;gap:1.2rem;
+  animation:fadeUp .8s .5s ease both;
+  z-index:3;
+}
+.btn-primary{
+  background:var(--r);
+  border:none;color:var(--t);
+  font-family:var(--font-mono);
+  font-size:.8rem;letter-spacing:3px;text-transform:uppercase;
+  padding:1rem 2.5rem;
+  cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:background .2s;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+}
+.btn-primary:hover{background:var(--rg)}
+.btn-primary::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  transform:translateX(-100%);transition:transform .5s;
+}
+.btn-primary:hover::before{transform:translateX(100%)}
+
+.btn-ghost{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--t2);
+  font-family:var(--font-mono);
+  font-size:.8rem;letter-spacing:3px;text-transform:uppercase;
+  padding:1rem 2.5rem;
+  cursor:pointer;
+  transition:all .2s;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+}
+.btn-ghost:hover{border-color:var(--r);color:var(--t);background:rgba(192,57,43,.1)}
+
+.scroll-indicator{
+  position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  font-family:var(--font-mono);font-size:.65rem;letter-spacing:4px;color:var(--t3);
+  animation:fadeUp .8s .8s ease both,bob 2s 2s ease-in-out infinite;
+}
+.scroll-indicator::after{
+  content:'';width:1px;height:50px;
+  background:linear-gradient(to bottom,var(--r),transparent);
+}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* blood drip anim */
+.blood-drip{
+  position:absolute;top:0;width:2px;border-radius:0 0 2px 2px;
+  background:linear-gradient(to bottom,var(--rd),var(--r));
+  animation:drip var(--dur,4s) var(--delay,0s) ease-in infinite;
+}
+@keyframes drip{
+  0%{height:0;opacity:0;top:-10px}
+  10%{opacity:1}
+  80%{opacity:1}
+  100%{height:var(--len,200px);opacity:0;top:100vh}
+}
+
+/* ============ SECTIONS ============ */
+.section-wrap{padding:7rem 4rem;max-width:1200px;margin:0 auto}
+.s-tag{
+  font-family:var(--font-mono);
+  font-size:.7rem;letter-spacing:6px;color:var(--r);text-transform:uppercase;
+  margin-bottom:.6rem;display:flex;align-items:center;gap:.8rem;
+}
+.s-tag::before{content:'';width:30px;height:1px;background:var(--r)}
+.s-title{
+  font-family:var(--font-head);
+  font-size:clamp(2.8rem,6vw,5.5rem);
+  line-height:.9;letter-spacing:2px;
+  margin-bottom:3rem;
+}
+.s-title em{font-style:normal;color:var(--r);-webkit-text-stroke:0}
+.divider-line{
+  width:100%;height:1px;
+  background:linear-gradient(to right,var(--r),rgba(192,57,43,.3),transparent);
+  margin-bottom:4rem;
+}
+
+/* ============ STORY ============ */
+#story{background:var(--bg2);position:relative;overflow:hidden}
+#story::before{
+  content:'BLOOD';
+  position:absolute;right:-2rem;top:50%;transform:translateY(-50%) rotate(90deg);
+  font-family:var(--font-head);font-size:18rem;
+  color:rgba(192,57,43,.03);letter-spacing:10px;
+  white-space:nowrap;pointer-events:none;
+}
+.story-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.story-text{font-size:1.05rem;line-height:2;color:var(--t2)}
+.story-text p+p{margin-top:1.5rem}
+.story-text strong{color:var(--rg)}
+.pochita-card{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:2.5rem;
+  position:relative;
+  overflow:hidden;
+}
+.pochita-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--rd),var(--rg),var(--rd));
+  background-size:200%;animation:shimmer 3s linear infinite;
+}
+@keyframes shimmer{to{background-position:200% center}}
+.pochita-card h3{
+  font-family:var(--font-head);font-size:2rem;
+  color:var(--y);letter-spacing:3px;margin-bottom:1rem;
+}
+.pochita-card p{font-size:.95rem;line-height:1.9;color:var(--t2)}
+
+/* Pochita animated drawing */
+.pochita-art{width:100px;height:100px;margin:0 auto 1.5rem;display:block}
+
+/* ============ CHARACTERS ============ */
+#chars{position:relative}
+.chars-outer{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5px;background:var(--border)}
+.char-tile{
+  background:var(--bg2);
+  padding:2.5rem 2rem;
+  cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:background .3s;
+}
+.char-tile::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(192,57,43,0) 0%,rgba(192,57,43,.12) 100%);
+  opacity:0;transition:opacity .3s;
+}
+.char-tile:hover{background:var(--bg3)}
+.char-tile:hover::after{opacity:1}
+
+.char-number{
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--t3);letter-spacing:3px;margin-bottom:1.2rem;
+}
+.char-avatar-big{
+  width:70px;height:70px;border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-size:1.6rem;
+  letter-spacing:1px;margin-bottom:1.2rem;
+  position:relative;overflow:hidden;
+}
+.char-avatar-big::before{
+  content:'';position:absolute;inset:0;
+  background:var(--c,var(--rd));opacity:.15;
+}
+.char-avatar-big span{position:relative;z-index:1;color:var(--c,var(--rg))}
+.char-tile-name{
+  font-family:var(--font-head);font-size:1.6rem;
+  letter-spacing:2px;line-height:1;margin-bottom:.4rem;
+}
+.char-tile-role{
+  font-family:var(--font-mono);font-size:.7rem;
+  letter-spacing:2px;color:var(--r);text-transform:uppercase;margin-bottom:1rem;
+}
+.char-tile-desc{
+  font-size:.88rem;line-height:1.8;color:var(--t2);
+  max-height:0;overflow:hidden;
+  transition:max-height .4s ease,opacity .3s;
+  opacity:0;
+}
+.char-tile.open .char-tile-desc{max-height:200px;opacity:1}
+.char-tile-hint{
+  font-family:var(--font-mono);font-size:.65rem;
+  color:var(--t3);letter-spacing:2px;margin-top:1.2rem;
+  transition:color .2s;
+}
+.char-tile:hover .char-tile-hint{color:var(--r)}
+.char-tile.open .char-tile-hint{display:none}
+
+/* ============ DEVIL ENCYCLOPEDIA ============ */
+#devils{background:var(--bg2);overflow:hidden;position:relative}
+.devils-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+.devil-list{display:flex;flex-direction:column;gap:.4rem}
+.devil-item{
+  border:1px solid transparent;
+  padding:1.2rem 1.5rem;
+  cursor:pointer;
+  border-radius:3px;
+  display:flex;align-items:center;gap:1.2rem;
+  transition:all .25s;
+  position:relative;
+}
+.devil-item::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--r);transform:scaleY(0);transform-origin:bottom;
+  transition:transform .25s;
+}
+.devil-item:hover{background:var(--bg3);border-color:var(--border)}
+.devil-item:hover::before{transform:scaleY(1)}
+.devil-item.active{background:var(--bg4);border-color:var(--border)}
+.devil-item.active::before{transform:scaleY(1)}
+.devil-icon{font-size:2rem;min-width:44px;text-align:center}
+.devil-item-name{font-family:var(--font-head);font-size:1rem;letter-spacing:1px}
+.devil-item-class{font-family:var(--font-mono);font-size:.65rem;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
+
+.devil-detail{
+  position:sticky;top:8rem;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:3rem;
+  min-height:400px;
+}
+.devil-detail-icon{font-size:5rem;margin-bottom:1.5rem;display:block}
+.devil-detail-name{
+  font-family:var(--font-head);font-size:2.5rem;
+  letter-spacing:3px;color:var(--rg);margin-bottom:.5rem;
+}
+.devil-detail-class{
+  font-family:var(--font-mono);font-size:.75rem;
+  letter-spacing:3px;color:var(--t3);text-transform:uppercase;margin-bottom:2rem;
+}
+.devil-detail-desc{font-size:.95rem;line-height:2;color:var(--t2);margin-bottom:2rem}
+.devil-stats{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.d-stat{background:var(--bg4);padding:1rem;border-radius:3px;border:1px solid rgba(255,255,255,.04)}
+.d-stat-label{font-family:var(--font-mono);font-size:.6rem;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:.4rem}
+.d-stat-val{font-family:var(--font-head);font-size:1.2rem;letter-spacing:1px;color:var(--y)}
+
+/* ============ POWER TIER ============ */
+#power{position:relative}
+.tier-block{margin-bottom:2rem}
+.tier-header{
+  display:flex;align-items:center;gap:1.5rem;margin-bottom:1rem;
+}
+.tier-letter{
+  font-family:var(--font-head);font-size:2.8rem;
+  min-width:60px;text-align:center;
+  line-height:1;
+}
+.tier-bar-row{
+  display:flex;align-items:center;gap:1rem;margin-bottom:.6rem;
+}
+.tier-name{font-family:var(--font-jp);font-size:.9rem;color:var(--t2);min-width:200px}
+.tier-bar{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.tier-fill{height:100%;border-radius:3px;width:0;transition:width 1.4s cubic-bezier(.22,1,.36,1)}
+.tier-num{font-family:var(--font-mono);font-size:.75rem;color:var(--t3);min-width:40px;text-align:right}
+
+/* ============ QUOTES ============ */
+#quotes{background:var(--bg2);position:relative;overflow:hidden;text-align:center}
+#quotes::before{
+  content:'"';
+  position:absolute;left:2rem;top:-4rem;
+  font-family:var(--font-head);font-size:30rem;
+  color:rgba(192,57,43,.04);line-height:1;pointer-events:none;
+}
+.quote-stage{max-width:750px;margin:0 auto;position:relative;z-index:1}
+.quote-curr{
+  font-family:var(--font-jp);font-weight:300;
+  font-size:clamp(1.4rem,3vw,2.2rem);
+  line-height:1.6;color:var(--t);
+  min-height:120px;
+  transition:opacity .4s,transform .4s;
+}
+.quote-curr.hide{opacity:0;transform:translateY(12px)}
+.quote-by{
+  font-family:var(--font-mono);font-size:.75rem;
+  letter-spacing:4px;color:var(--r);text-transform:uppercase;
+  margin-top:1.5rem;transition:opacity .4s;
+}
+.quote-dots{display:flex;gap:.6rem;justify-content:center;margin-top:2rem}
+.qdot{width:6px;height:6px;border-radius:50%;background:var(--t3);cursor:pointer;transition:all .2s}
+.qdot.active{background:var(--r);transform:scale(1.4)}
+.quote-arrows{display:flex;gap:1rem;justify-content:center;margin-top:2rem}
+.qarr{
+  background:none;border:1px solid var(--border);
+  color:var(--t2);width:48px;height:48px;border-radius:50%;
+  font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.qarr:hover{background:var(--r);border-color:var(--r);color:#fff}
+
+/* ============ TRIVIA ============ */
+#trivia{position:relative}
+.trivia-wrap{max-width:760px;margin:0 auto}
+.score-pill{
+  display:inline-flex;align-items:center;gap:.8rem;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:100px;padding:.6rem 1.5rem;margin-bottom:2.5rem;
+  font-family:var(--font-mono);font-size:.8rem;letter-spacing:2px;
+}
+.score-num{font-family:var(--font-head);font-size:1.4rem;color:var(--y)}
+.q-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:4px;padding:2.5rem;
+  position:relative;overflow:hidden;
+}
+.q-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--rd),var(--rg));
+}
+.q-number{font-family:var(--font-mono);font-size:.65rem;letter-spacing:3px;color:var(--t3);margin-bottom:1rem;text-transform:uppercase}
+.q-text{font-family:var(--font-jp);font-size:1.15rem;font-weight:700;margin-bottom:2rem;line-height:1.5}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.q-opt{
+  background:var(--bg3);border:1px solid rgba(255,255,255,.06);
+  color:var(--t2);padding:1rem 1.2rem;border-radius:3px;
+  cursor:pointer;font-family:var(--font-jp);font-size:.9rem;text-align:left;
+  transition:all .2s;display:flex;align-items:center;gap:.8rem;
+  position:relative;overflow:hidden;
+}
+.q-opt::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--r);transform:scaleY(0);transition:transform .2s;
+}
+.q-opt:hover:not(:disabled){border-color:var(--r);color:var(--t);background:rgba(192,57,43,.08)}
+.q-opt:hover:not(:disabled)::before{transform:scaleY(1)}
+.q-opt.correct{background:rgba(39,174,96,.12);border-color:#27ae60;color:#2ecc71}
+.q-opt.correct::before{background:#27ae60;transform:scaleY(1)}
+.q-opt.wrong{background:rgba(192,57,43,.15);border-color:var(--r);color:var(--rg)}
+.q-opt.wrong::before{transform:scaleY(1)}
+.opt-letter{
+  font-family:var(--font-mono);font-size:.7rem;letter-spacing:2px;
+  min-width:22px;color:var(--t3);
+}
+.q-opt.correct .opt-letter,.q-opt.wrong .opt-letter{color:inherit}
+.q-next{
+  margin-top:1.5rem;
+  background:var(--r);border:none;color:#fff;
+  font-family:var(--font-mono);font-size:.8rem;letter-spacing:3px;text-transform:uppercase;
+  padding:.9rem 2.5rem;cursor:pointer;
+  clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);
+  display:none;transition:background .2s;
+}
+.q-next.show{display:inline-block}
+.q-next:hover{background:var(--rg)}
+
+/* Final score */
+.final-score{text-align:center;padding:2rem}
+.final-score .big{
+  font-family:var(--font-head);font-size:6rem;
+  color:var(--y);letter-spacing:4px;
+}
+.final-score p{font-size:1rem;color:var(--t2);margin-top:.5rem;line-height:1.7}
+.replay-btn{
+  margin-top:2rem;
+  background:none;border:1px solid var(--border);
+  color:var(--t2);font-family:var(--font-mono);font-size:.8rem;letter-spacing:3px;text-transform:uppercase;
+  padding:.9rem 2.5rem;cursor:pointer;transition:all .2s;
+  clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);
+}
+.replay-btn:hover{background:var(--r);border-color:var(--r);color:#fff}
+
+/* ============ GALLERY WALL ============ */
+#gallery{background:var(--bg2);overflow:hidden}
+.art-wall{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:rgba(192,57,43,.1)}
+.art-cell{
+  aspect-ratio:1;background:var(--bg3);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.art-cell svg{width:70%;height:70%;transition:transform .4s,filter .4s;filter:brightness(.7)}
+.art-cell:hover svg{transform:scale(1.08);filter:brightness(1)}
+.art-cell-label{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:.8rem;background:linear-gradient(to top,rgba(8,8,8,.9),transparent);
+  font-family:var(--font-mono);font-size:.65rem;letter-spacing:2px;color:var(--t2);
+  transform:translateY(100%);transition:transform .3s;text-transform:uppercase;
+}
+.art-cell:hover .art-cell-label{transform:translateY(0)}
+
+/* ============ FOOTER ============ */
+footer{
+  border-top:1px solid var(--border);
+  padding:3rem 4rem;
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:2rem;align-items:center;
+}
+.footer-logo{font-family:var(--font-head);font-size:2rem;color:var(--r);letter-spacing:4px}
+.footer-jp{font-family:var(--font-jp);font-size:.8rem;color:var(--t3);margin-top:.3rem}
+.footer-links{display:flex;flex-direction:column;gap:.6rem}
+.footer-links a{
+  font-family:var(--font-mono);font-size:.7rem;letter-spacing:2px;
+  color:var(--t3);text-decoration:none;transition:color .2s;text-transform:uppercase;
+}
+.footer-links a:hover{color:var(--rg)}
+.footer-copy{font-family:var(--font-mono);font-size:.65rem;letter-spacing:2px;color:var(--t3);text-align:right;line-height:1.8}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s,transform .7s}
+.reveal.in{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+
+@media(max-width:900px){
+  nav{padding:.8rem 1.5rem}
+  .nav-links{gap:1.2rem}
+  .section-wrap{padding:5rem 1.5rem}
+  .story-layout{grid-template-columns:1fr}
+  .chars-outer{grid-template-columns:1fr 1fr}
+  .devils-grid{grid-template-columns:1fr}
+  .q-opts{grid-template-columns:1fr}
+  .art-wall{grid-template-columns:repeat(2,1fr)}
+  footer{grid-template-columns:1fr;text-align:center}
+  .footer-copy{text-align:center}
+}
+@media(max-width:500px){
+  .chars-outer{grid-template-columns:1fr}
+  .hero-title{font-size:5rem}
+}
+</style>
+</head>
+<body>
+
+<div id="noise"></div>
+<div id="cur"></div>
+<div id="cur2"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">CSM</div>
+  <ul class="nav-links">
+    <li><a href="#story">História</a></li>
+    <li><a href="#chars">Personagens</a></li>
+    <li><a href="#devils">Demônios</a></li>
+    <li><a href="#power">Poder</a></li>
+    <li><a href="#quotes">Frases</a></li>
+    <li><a href="#trivia">Quiz</a></li>
+  </ul>
+</nav>
+
+<!-- ====== HERO ====== -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="scanlines"></div>
+  <div class="hero-slash"></div>
+  <div class="hero-slash"></div>
+  <div class="hero-slash"></div>
+
+  <!-- BG chainsaw -->
+  <svg class="chainsaw-bg-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="200" cy="200" r="190" fill="none" stroke="#c0392b" stroke-width="6"/>
+    <circle cx="200" cy="200" r="130" fill="none" stroke="#c0392b" stroke-width="3"/>
+    <circle cx="200" cy="200" r="60" fill="#8b0000" stroke="#e74c3c" stroke-width="4"/>
+    <circle cx="200" cy="200" r="20" fill="#e74c3c"/>
+    <g fill="#c0392b">
+      <rect x="194" y="2" width="12" height="30" rx="4"/>
+      <rect x="194" y="368" width="12" height="30" rx="4"/>
+      <rect x="2" y="194" width="30" height="12" rx="4"/>
+      <rect x="368" y="194" width="30" height="12" rx="4"/>
+      <rect x="60" y="30" width="12" height="30" rx="4" transform="rotate(45 66 45)"/>
+      <rect x="310" y="330" width="12" height="30" rx="4" transform="rotate(45 316 345)"/>
+      <rect x="30" y="310" width="30" height="12" rx="4" transform="rotate(45 45 316)"/>
+      <rect x="330" y="60" width="30" height="12" rx="4" transform="rotate(45 345 66)"/>
+    </g>
+    <rect x="180" y="165" width="180" height="70" rx="8" fill="#5a1208"/>
+    <polygon points="360,170 400,200 360,230" fill="#c0392b"/>
+    <rect x="185" y="155" width="10" height="80" rx="3" fill="#e74c3c"/>
+    <rect x="205" y="155" width="10" height="80" rx="3" fill="#e74c3c"/>
+    <rect x="225" y="155" width="10" height="80" rx="3" fill="#e74c3c"/>
+    <rect x="245" y="155" width="10" height="80" rx="3" fill="#e74c3c"/>
+    <rect x="265" y="155" width="10" height="80" rx="3" fill="#e74c3c"/>
+    <rect x="285" y="155" width="10" height="80" rx="3" fill="#e74c3c"/>
+    <rect x="305" y="155" width="10" height="80" rx="3" fill="#e74c3c"/>
+  </svg>
+
+  <!-- blood drips -->
+  <script>
+  document.addEventListener('DOMContentLoaded',()=>{
+    const hero=document.getElementById('hero');
+    for(let i=0;i<12;i++){
+      const d=document.createElement('div');
+      d.className='blood-drip';
+      d.style.cssText=`left:${Math.random()*100}%;--dur:${3+Math.random()*5}s;--delay:${Math.random()*6}s;--len:${80+Math.random()*180}px`;
+      hero.appendChild(d);
+    }
+  });
+  </script>
+
+  <p class="hero-jp">チェンソーマン &nbsp;·&nbsp; Tatsuki Fujimoto &nbsp;·&nbsp; 2018</p>
+  <h1 class="hero-title">
+    <span class="line1">CHAINSAW</span>
+    <span class="line2">MAN</span>
+    <span class="line3">モーターソー</span>
+  </h1>
+  <div class="hero-sub-row">
+    <span>PART 1</span> · Manga
+    <span>|</span>
+    <span>PART 2</span> · Academy Arc
+    <span>|</span>
+    MAPPA Anime 2022
+  </div>
+  <div class="hero-cta">
+    <button class="btn-primary" onclick="document.getElementById('story').scrollIntoView({behavior:'smooth'})">Explorar o Mundo</button>
+    <button class="btn-ghost" onclick="document.getElementById('trivia').scrollIntoView({behavior:'smooth'})">Fazer o Quiz</button>
+  </div>
+  <div class="scroll-indicator">ROLAR</div>
+</section>
+
+<!-- ====== STORY ====== -->
+<section id="story">
+  <div class="section-wrap">
+    <div class="s-tag">Sinopse</div>
+    <h2 class="s-title reveal">DO LIXO<br>AO <em>INFERNO</em></h2>
+    <div class="divider-line"></div>
+    <div class="story-layout">
+      <div class="story-text reveal">
+        <p><strong>Denji</strong> é um jovem miserável que vive pagando dívidas de yakuza ligados a demônios. Sua única companhia é <strong>Pochita</strong> — um pequeno demônio-motosserra com aparência de cachorro ferido que encontrou na floresta.</p>
+        <p>Depois de anos trabalhando como caçador de demônios ilegal, Denji é traído e assassinado pelos próprios yakuza. Pochita, em um ato de amor sincero, funde seu coração ao peito de Denji — e assim nasce o <strong>Chainsaw Man</strong>.</p>
+        <p>Recrutado pela agência governamental de <strong>Segurança Pública</strong>, Denji enfrenta demônios cada vez mais poderosos — tudo isso enquanto busca algo ridiculamente simples: uma boa refeição, um lugar para dormir e talvez... um toque de mão de uma garota bonita.</p>
+        <p>Mas por trás da comédia brutal e dos banhos de sangue, Chainsaw Man esconde uma das narrativas mais devastadoramente humanas do manga moderno.</p>
+      </div>
+      <div class="pochita-card reveal reveal-delay-2">
+        <!-- Pochita SVG -->
+        <svg class="pochita-art" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <!-- body -->
+          <ellipse cx="50" cy="62" rx="28" ry="22" fill="#c0392b"/>
+          <!-- head -->
+          <circle cx="50" cy="38" r="22" fill="#c0392b"/>
+          <!-- ears -->
+          <ellipse cx="33" cy="20" rx="8" ry="12" fill="#a93226" transform="rotate(-20 33 20)"/>
+          <ellipse cx="67" cy="20" rx="8" ry="12" fill="#a93226" transform="rotate(20 67 20)"/>
+          <!-- eyes -->
+          <circle cx="42" cy="34" r="5" fill="#fff"/>
+          <circle cx="58" cy="34" r="5" fill="#fff"/>
+          <circle cx="43" cy="34" r="2.5" fill="#111"/>
+          <circle cx="59" cy="34" r="2.5" fill="#111"/>
+          <circle cx="44" cy="33" r=".8" fill="#fff"/>
+          <circle cx="60" cy="33" r=".8" fill="#fff"/>
+          <!-- chainsaw snout -->
+          <rect x="37" y="44" width="26" height="10" rx="3" fill="#7b1a12"/>
+          <rect x="39" y="41" width="4" height="6" rx="1.5" fill="#e74c3c"/>
+          <rect x="46" y="41" width="4" height="6" rx="1.5" fill="#e74c3c"/>
+          <rect x="53" y="41" width="4" height="6" rx="1.5" fill="#e74c3c"/>
+          <!-- tail -->
+          <path d="M78 65 Q96 50 88 36" stroke="#c0392b" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <circle cx="88" cy="35" r="5" fill="#c0392b"/>
+          <!-- paws -->
+          <ellipse cx="35" cy="82" rx="10" ry="7" fill="#a93226"/>
+          <ellipse cx="65" cy="82" rx="10" ry="7" fill="#a93226"/>
+          <!-- nose -->
+          <ellipse cx="50" cy="46" rx="3" ry="2" fill="#5a1208"/>
+          <!-- inner ear -->
+          <ellipse cx="33" cy="21" rx="4" ry="7" fill="#c0392b" transform="rotate(-20 33 21)"/>
+          <ellipse cx="67" cy="21" rx="4" ry="7" fill="#c0392b" transform="rotate(20 67 21)"/>
+        </svg>
+        <h3>POCHITA</h3>
+        <p>O Demônio-Motosserra original. Conhecido no inferno como o ser mais temido — capaz de cortar até mesmo outros demônios para fora da existência. Mas para Denji, era apenas um cachorrinho amigo que balançava o rabo. O contrato deles é o coração de toda a história — literalmente.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== CHARACTERS ====== -->
+<section id="chars">
+  <div class="section-wrap" style="max-width:100%;padding-left:0;padding-right:0">
+    <div style="padding:0 4rem 0">
+      <div class="s-tag">Elenco</div>
+      <h2 class="s-title reveal">PERSONAGENS</h2>
+      <div class="divider-line"></div>
+      <p style="font-family:var(--font-mono);font-size:.75rem;letter-spacing:2px;color:var(--t3);margin-bottom:2rem">CLIQUE EM UM PERSONAGEM PARA REVELAR INFORMAÇÕES</p>
+    </div>
+    <div class="chars-outer" id="chars-grid"></div>
+  </div>
+</section>
+
+<!-- ====== DEVILS ====== -->
+<section id="devils">
+  <div class="section-wrap">
+    <div class="s-tag">Enciclopédia</div>
+    <h2 class="s-title reveal">OS <em>DEMÔNIOS</em></h2>
+    <div class="divider-line"></div>
+    <div class="devils-grid">
+      <div class="devil-list" id="devil-list"></div>
+      <div class="devil-detail" id="devil-detail">
+        <span style="font-size:4rem;margin-bottom:1rem;display:block;opacity:.3">⚙</span>
+        <div style="font-family:var(--font-mono);font-size:.75rem;letter-spacing:3px;color:var(--t3)">SELECIONE UM DEMÔNIO</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== POWER ====== -->
+<section id="power">
+  <div class="section-wrap">
+    <div class="s-tag">Análise de Combate</div>
+    <h2 class="s-title reveal">RANKING<br>DE <em>PODER</em></h2>
+    <div class="divider-line"></div>
+    <p style="font-family:var(--font-mono);font-size:.7rem;letter-spacing:2px;color:var(--t3);margin-bottom:3rem">ESTIMATIVA BASEADA NOS EVENTOS DO MANGÁ · PODE CONTER SPOILERS LEVES</p>
+    <div id="tier-container"></div>
+  </div>
+</section>
+
+<!-- ====== QUOTES ====== -->
+<section id="quotes">
+  <div class="section-wrap" style="text-align:center">
+    <div class="s-tag" style="justify-content:center">Palavras que Ficaram</div>
+    <h2 class="s-title reveal">AS <em>FRASES</em></h2>
+    <div class="divider-line"></div>
+    <div class="quote-stage">
+      <div class="quote-curr" id="q-text"></div>
+      <div class="quote-by" id="q-by"></div>
+      <div class="quote-dots" id="q-dots"></div>
+      <div class="quote-arrows">
+        <button class="qarr" id="qprev">&#8592;</button>
+        <button class="qarr" id="qnext">&#8594;</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== GALLERY ====== -->
+<section id="gallery">
+  <div class="section-wrap">
+    <div class="s-tag">Arte</div>
+    <h2 class="s-title reveal">GALERIA</h2>
+    <div class="divider-line"></div>
+  </div>
+  <div class="art-wall" id="art-wall"></div>
+</section>
+
+<!-- ====== TRIVIA ====== -->
+<section id="trivia">
+  <div class="section-wrap">
+    <div class="s-tag">Quiz Interativo</div>
+    <h2 class="s-title reveal">VOCÊ CONHECE<br><em>CHAINSAW MAN?</em></h2>
+    <div class="divider-line"></div>
+    <div class="trivia-wrap">
+      <div class="score-pill">
+        <span>PONTUAÇÃO</span>
+        <span class="score-num" id="score-num">0</span>
+        <span style="color:var(--t3)">/</span>
+        <span class="score-num" id="total-num">0</span>
+      </div>
+      <div id="q-area"></div>
+      <button class="q-next" id="q-next-btn">Próxima →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">CSM</div>
+    <div class="footer-jp">チェンソーマン</div>
+  </div>
+  <div class="footer-links">
+    <a href="#story">A História</a>
+    <a href="#chars">Personagens</a>
+    <a href="#devils">Demônios</a>
+    <a href="#trivia">Quiz</a>
+  </div>
+  <div class="footer-copy">
+    Chainsaw Man © Tatsuki Fujimoto<br>
+    Shueisha · Weekly Shonen Jump<br>
+    Site fan-made · Sem fins lucrativos<br>
+    2018 – Presente
+  </div>
+</footer>
+
+<script>
+/* ========= CURSOR ========= */
+const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function ani(){cx+=(mx-cx)*.15;cy+=(my-cy)*.15;cur2.style.left=cx+'px';cur2.style.top=cy+'px';requestAnimationFrame(ani)})();
+
+/* ========= NAV SCROLL ========= */
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>60)});
+
+/* ========= REVEAL ========= */
+const obs=new IntersectionObserver(els=>{els.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')})},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+/* ========= CHARACTERS ========= */
+const chars=[
+  {n:'Denji',r:'Protagonista / Chainsaw Man',c:'#c0392b',i:'DE',
+   d:'Jovem ex-catador de demônios ilegal que se fundiu com Pochita. Ativa motosserras emergindo do peito e dos braços. Seus objetivos são simples e humanos: comer bem, ter um teto e ser amado. Isso torna sua jornada brutal ainda mais poderosa.'},
+  {n:'Makima',r:'Capitã · Demônio do Controle',c:'#6c3483',i:'MA',
+   d:'Enigmática, sedutora e devastadoramente perigosa. Lidera a Divisão de Segurança Pública com mão de ferro. Sua verdadeira natureza e planos são revelados em uma das reviravolta mais chocantes do manga moderno.'},
+  {n:'Power',r:'Fiend · Demônio do Sangue',c:'#e74c3c',i:'PO',
+   d:'Ex-Demônio do Sangue que habita um corpo humano. Egocêntrica, impulsiva, mentirosa compulsiva e completamente adorável. Ama seu gato Meowy acima de tudo. Sua arc de desenvolvimento é inesperadamente emocionante.'},
+  {n:'Aki Hayakawa',r:'Caçador Sênior',c:'#2c3e50',i:'AK',
+   d:'Sério, dedicado e carregado de traumas. Perdeu a família para o Demônio das Armas e jurou vingança. Fez contratos com múltiplos demônios — cada um custando parte de si mesmo. Seu destino é um dos mais dolorosos da série.'},
+  {n:'Himeno',r:'Caçadora · Parceira de Aki',c:'#16a085',i:'HI',
+   d:'Veterana cínica com um tapa-olho e um exterior frio. Seu contrato com o Demônio-Fantasma custa partes do próprio corpo. Por baixo da dureza, guarda afeto genuíno. Sua cena mais icônica é também a mais inesperada.'},
+  {n:'Quanxi',r:'Caçadora Chinesa · Híbrido',c:'#d35400',i:'QU',
+   d:'A mais forte caçadora humana da China. Híbrido do Demônio da Flecha, luta com eficiência fria e mortífera. Comanda um harém de fiends e sua lealdade às suas companheiras é absoluta e inabalável.'},
+];
+
+const grid=document.getElementById('chars-grid');
+chars.forEach((c,i)=>{
+  const t=document.createElement('div');
+  t.className='char-tile';
+  t.innerHTML=`
+    <div class="char-number">0${i+1} / 0${chars.length}</div>
+    <div class="char-avatar-big" style="--c:${c.c}"><span>${c.i}</span></div>
+    <div class="char-tile-name">${c.n}</div>
+    <div class="char-tile-role">${c.r}</div>
+    <div class="char-tile-desc">${c.d}</div>
+    <div class="char-tile-hint">↓ CLIQUE PARA VER MAIS</div>
+  `;
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.char-tile').forEach(x=>x!==t&&x.classList.remove('open'));
+    t.classList.toggle('open');
+  });
+  grid.appendChild(t);
+});
+
+/* ========= DEVILS ========= */
+const devils=[
+  {n:'Demônio da Motosserra',icon:'⚙️',cls:'Primordial',
+   desc:'O ser mais temido no inferno. Quando o Chainsaw Man devora um demônio, tanto o demônio quanto o conceito que ele representa são apagados da existência. Por isso, demônios que foram devorados nunca existiram para os humanos — como armas nucleares e outros terrores.',
+   stats:[{l:'Nível de Ameaça',v:'LENDÁRIO'},{l:'Origem',v:'Inferno'},{l:'Poder Principal',v:'Devorar & Apagar'},{l:'Status',v:'Ativo (Denji)'}]},
+  {n:'Demônio do Controle',icon:'👁️',cls:'Quatro Cavaleiros',
+   desc:'Representa o medo de controle e dominação. Pode dominar qualquer ser que considere inferior — ou seja, quase tudo. Sua rede de manipulação se estende por continentes inteiros, com contratos e agentes em todo lugar.',
+   stats:[{l:'Nível de Ameaça',v:'CATASTRÓFICO'},{l:'Origem',v:'Inferno'},{l:'Poder Principal',v:'Dominação Total'},{l:'Status',v:'Revelada'}]},
+  {n:'Demônio do Sangue',icon:'🩸',cls:'Demônio Natural',
+   desc:'Power em sua forma verdadeira. Controla e manipula sangue com precisão cirúrgica — pode criar armas, escudos e projéteis de sangue, incluindo o de inimigos. Uma das batalhas mais visualmente impressionantes do manga envolve esse poder.',
+   stats:[{l:'Nível de Ameaça',v:'ALTO'},{l,'Origem',v:'Inferno'},{l:'Poder Principal',v:'Manipulação de Sangue'},{l:'Status',v:'Power (Fiend)'}]},
+  {n:'Demônio da Eternidade',icon:'∞',cls:'Demônio Natural',
+   desc:'Criou um loop eterno dentro de um hotel, aprisionando Denji e sua equipe num corredor sem fim. Sua fraqueza foi descoberta e explorada de forma brutal — Denji passou literalmente dias bebendo seu próprio sangue para vencê-lo.',
+   stats:[{l:'Nível de Ameaça',v:'ALTO'},{l:'Origem',v:'Inferno'},{l:'Poder Principal',v:'Espaço Infinito'},{l:'Status',v:'Derrotado'}]},
+  {n:'Demônio das Armas',icon:'🔫',cls:'Quatro Cavaleiros',
+   desc:'Um dos irmãos primordiais. Responsável por conflitos armados catastróficos na história humana. Possui três formas híbridas e é o alvo de vingança de Aki Hayakawa. Sua batalha final é devastadora em todos os sentidos.',
+   stats:[{l:'Nível de Ameaça',v:'CATASTRÓFICO'},{l:'Origem',v:'Inferno'},{l:'Poder Principal',v:'Híbridos de Armas'},{l:'Status',v:'Batalha Final'}]},
+  {n:'Demônio da Morte',icon:'💀',cls:'Quatro Cavaleiros',
+   desc:'Tão poderoso que seu nome não pode ser pronunciado sem consequências. Seu verdadeiro nome causa a morte instantânea de quem o ouve. Uma das entidades mais temidas e menos compreendidas de toda a mitologia de Chainsaw Man.',
+   stats:[{l:'Nível de Ameaça',v:'ABSOLUTO'},{l:'Origem',v:'Inferno'},{l:'Poder Principal',v:'Morte Instantânea'},{l:'Status',v:'Não Revelado'}]},
+  {n:'Demônio-Fantasma',icon:'👻',cls:'Demônio Natural',
+   desc:'Invisível para qualquer um que não veja a morte de perto. Himeno sacrificou seu olho direito para fazer o contrato, depois mais partes do corpo. Pode criar membros fantasma que atravessam matéria sólida — aterrorizante em combate.',
+   stats:[{l:'Nível de Ameaça',v:'MÉDIO-ALTO'},{l:'Origem',v:'Terra'},{l:'Poder Principal',v:'Invisibilidade & Fase'},{l:'Status',v:'Contrato: Himeno'}]},
+  {n:'Demônio da Cobra',icon:'🐍',cls:'Demônio Natural',
+   desc:'Pode engolir demônios inteiros e invocar a cobra para atacar. Usado por Quanxi, é especialmente eficaz contra outros demônios que dependem de formas físicas grandes. A cobra emerge com velocidade chocante.',
+   stats:[{l:'Nível de Ameaça',v:'ALTO'},{l:'Origem',v:'Terra'},{l:'Poder Principal',v:'Devorar & Invocar'},{l:'Status',v:'Contrato: Quanxi'}]},
+];
+
+const list=document.getElementById('devil-list');
+const detail=document.getElementById('devil-detail');
+
+devils.forEach((d,i)=>{
+  const item=document.createElement('div');
+  item.className='devil-item';
+  item.innerHTML=`<span class="devil-icon">${d.icon}</span><div><div class="devil-item-name">${d.n}</div><div class="devil-item-class">${d.cls}</div></div>`;
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.devil-item').forEach(x=>x.classList.remove('active'));
+    item.classList.add('active');
+    detail.innerHTML=`
+      <span class="devil-detail-icon">${d.icon}</span>
+      <div class="devil-detail-name">${d.n}</div>
+      <div class="devil-detail-class">${d.cls}</div>
+      <div class="devil-detail-desc">${d.desc}</div>
+      <div class="devil-stats">${d.stats.map(s=>`<div class="d-stat"><div class="d-stat-label">${s.l}</div><div class="d-stat-val">${s.v}</div></div>`).join('')}</div>
+    `;
+  });
+  list.appendChild(item);
+});
+
+/* ========= POWER TIERS ========= */
+const tiers=[
+  {letter:'S',color:'#e74c3c',items:[
+    {n:'Pochita (Forma Verdadeira)',v:98},{n:'Makima / Demônio do Controle',v:96},{n:'Demônio da Morte',v:95},
+  ]},
+  {letter:'A',color:'#e67e22',items:[
+    {n:'Denji — Chainsaw Man Pleno',v:88},{n:'Quanxi (Modo Híbrido)',v:83},{n:'Demônio das Armas',v:81},
+  ]},
+  {letter:'B',color:'#f2c94c',items:[
+    {n:'Santa Claus (Forma Final)',v:75},{n:'Aki — Demônio do Futuro',v:70},{n:'Power — Demônio do Sangue',v:68},
+  ]},
+  {letter:'C',color:'#27ae60',items:[
+    {n:'Himeno + Demônio-Fantasma',v:58},{n:'Beam (Demônio-Tubarão)',v:52},{n:'Angel Devil',v:50},
+  ]},
+];
+
+const tc=document.getElementById('tier-container');
+tiers.forEach((t,ti)=>{
+  const block=document.createElement('div');
+  block.className='tier-block reveal';
+  block.style.transitionDelay=(ti*0.1)+'s';
+  block.innerHTML=`
+    <div class="tier-header">
+      <span class="tier-letter" style="color:${t.color}">${t.letter}</span>
+      <div style="flex:1;height:1px;background:linear-gradient(to right,${t.color}44,transparent)"></div>
+    </div>
+    ${t.items.map(p=>`
+      <div class="tier-bar-row">
+        <span class="tier-name">${p.n}</span>
+        <div class="tier-bar"><div class="tier-fill" data-val="${p.v}" style="background:linear-gradient(to right,${t.color}88,${t.color})"></div></div>
+        <span class="tier-num">${p.v}</span>
+      </div>
+    `).join('')}
+  `;
+  tc.appendChild(block);
+  obs.observe(block);
+});
+
+const barObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.tier-fill').forEach(f=>{f.style.width=f.dataset.val+'%'});
+    }
+  });
+},{threshold:.3});
+document.querySelectorAll('.tier-block').forEach(b=>barObs.observe(b));
+
+/* ========= QUOTES ========= */
+const quotes=[
+  {t:'Eu vou fazer tudo que você mandar. Mas, em troca, deixa eu realizar pelo menos um sonho meu.',by:'Denji'},
+  {t:'Um homem com nada a perder é o ser mais perigoso que existe — mais do que qualquer demônio.',by:'Makima'},
+  {t:'Power é o nome mais bonito do mundo. Porque é o nome de Power!',by:'Power'},
+  {t:'Se eu sobreviver... vou parar de fumar.',by:'Aki Hayakawa'},
+  {t:'Quem quer que você seja agora, terá de viver com isso para sempre.',by:'Makima'},
+  {t:'Há pessoas que nunca chegam ao inferno. Mas há lugares piores que o inferno neste mundo.',by:'Kishibe'},
+  {t:'Eu não preciso de sonhos. Só preciso de você vivo.',by:'Pochita'},
+  {t:'No final, o amor que você dá é igual ao amor que você recebe.',by:'Himeno'},
+];
+
+let qi=0;
+const qtext=document.getElementById('q-text');
+const qby=document.getElementById('q-by');
+const qdots=document.getElementById('q-dots');
+
+quotes.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='qdot'+(i===0?' active':'');
+  d.addEventListener('click',()=>goQ(i));
+  qdots.appendChild(d);
+});
+
+function goQ(i){
+  qtext.classList.add('hide');setTimeout(()=>{
+    qi=i;qtext.textContent='"'+quotes[i].t+'"';
+    qby.textContent='— '+quotes[i].by;
+    qtext.classList.remove('hide');
+    document.querySelectorAll('.qdot').forEach((d,di)=>d.classList.toggle('active',di===i));
+  },350);
+}
+goQ(0);
+document.getElementById('qnext').addEventListener('click',()=>goQ((qi+1)%quotes.length));
+document.getElementById('qprev').addEventListener('click',()=>goQ((qi-1+quotes.length)%quotes.length));
+setInterval(()=>goQ((qi+1)%quotes.length),7000);
+
+/* ========= ART GALLERY ========= */
+const artData=[
+  {label:'Denji vs Bat Devil',bg:'#1a0505',svg:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="55" fill="#2a0808"/><path d="M60 20 L50 60 L30 55 L60 100 L90 55 L70 60 Z" fill="#c0392b"/><circle cx="60" cy="45" r="12" fill="#e74c3c"/><rect x="54" y="57" width="12" height="35" rx="2" fill="#7b1a12"/></svg>`},
+  {label:'Power & Meowy',bg:'#0a0a12',svg:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="50" r="25" fill="#c0392b"/><ellipse cx="60" cy="82" rx="20" ry="16" fill="#c0392b"/><circle cx="48" cy="44" r="6" fill="#fff"/><circle cx="72" cy="44" r="6" fill="#fff"/><circle cx="49" cy="44" r="3" fill="#111"/><circle cx="73" cy="44" r="3" fill="#111"/><path d="M52 58 Q60 65 68 58" stroke="#7b1a12" stroke-width="2" fill="none"/><ellipse cx="35" cy="30" rx="8" ry="12" fill="#a93226" transform="rotate(-25 35 30)"/><ellipse cx="85" cy="30" rx="8" ry="12" fill="#a93226" transform="rotate(25 85 30)"/><circle cx="90" cy="90" r="10" fill="#e8e0d0"/><circle cx="88" cy="88" r="4" fill="#c9b89a"/></svg>`},
+  {label:'Aki & Futuro',bg:'#080c12',svg:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="120" height="120" fill="#080c16"/><line x1="60" y1="10" x2="60" y2="110" stroke="#1e3a5f" stroke-width="20" opacity=".3"/><circle cx="60" cy="40" r="18" fill="#1a2e44" stroke="#2980b9" stroke-width="1.5"/><rect x="54" y="58" width="12" height="40" rx="2" fill="#1a2e44"/><path d="M30 90 Q60 70 90 90" stroke="#2980b9" stroke-width="2" fill="none" opacity=".5"/><circle cx="60" cy="40" r="8" fill="#2980b9" opacity=".6"/></svg>`},
+  {label:'Makima',bg:'#0d080f',svg:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="45" r="22" fill="#3d1f4e"/><ellipse cx="60" cy="85" rx="22" ry="28" fill="#3d1f4e"/><circle cx="51" cy="40" r="5" fill="#8e44ad"/><circle cx="69" cy="40" r="5" fill="#8e44ad"/><circle cx="52" cy="40" r="2" fill="#fff"/><circle cx="70" cy="40" r="2" fill="#fff"/><path d="M53 52 Q60 57 67 52" stroke="#6c3483" stroke-width="1.5" fill="none"/><g opacity=".4"><circle cx="20" cy="20" r="3" fill="#8e44ad"/><circle cx="100" cy="15" r="2" fill="#8e44ad"/><circle cx="10" cy="80" r="4" fill="#8e44ad"/><circle cx="110" cy="90" r="3" fill="#8e44ad"/></g><path d="M40 30 L60 23 L80 30 L75 18 L60 10 L45 18 Z" fill="#6c3483" opacity=".5"/></svg>`},
+  {label:'Chainsaw Man — Forma Plena',bg:'#120404',svg:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="55" fill="#1a0505"/><circle cx="60" cy="42" r="18" fill="#8b0000"/><ellipse cx="60" cy="78" rx="18" ry="20" fill="#8b0000"/><rect x="48" y="34" width="24" height="8" rx="2" fill="#c0392b"/><rect x="50" y="30" width="4" height="10" rx="1.5" fill="#e74c3c"/><rect x="57" y="30" width="4" height="10" rx="1.5" fill="#e74c3c"/><rect x="64" y="30" width="4" height="10" rx="1.5" fill="#e74c3c"/><rect x="30" y="55" width="24" height="6" rx="2" fill="#c0392b"/><rect x="22" y="52" width="4" height="10" rx="1.5" fill="#e74c3c"/><rect x="29" y="52" width="4" height="10" rx="1.5" fill="#e74c3c"/><rect x="66" y="55" width="24" height="6" rx="2" fill="#c0392b"/><rect x="90" y="52" width="4" height="10" rx="1.5" fill="#e74c3c"/><rect x="83" y="52" width="4" height="10" rx="1.5" fill="#e74c3c"/><circle cx="52" cy="41" r="4" fill="#fff"/><circle cx="68" cy="41" r="4" fill="#fff"/><circle cx="53" cy="41" r="2" fill="#c0392b"/><circle cx="69" cy="41" r="2" fill="#c0392b"/></svg>`},
+  {label:'Himeno',bg:'#060c0b',svg:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="45" r="20" fill="#0d2b26"/><ellipse cx="60" cy="82" rx="18" ry="24" fill="#0d2b26"/><circle cx="53" cy="40" r="5" fill="#1abc9c" opacity=".7"/><rect x="49" y="36" width="11" height="9" rx="2" fill="#0d2b26" stroke="#1abc9c" stroke-width=".5"/><circle cx="67" cy="40" r="5" fill="#1abc9c"/><circle cx="68" cy="40" r="2" fill="#0d4a3e"/><path d="M53 52 Q60 58 67 52" stroke="#1abc9c" stroke-width="1.5" fill="none"/><path d="M44 65 Q36 80 30 95" stroke="#1abc9c" stroke-width="8" fill="none" opacity=".3" stroke-linecap="round"/></svg>`},
+  {label:'A Divisão Pública',bg:'#0a0a0a',svg:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="100" fill="#111" rx="4"/><circle cx="30" cy="50" r="12" fill="#c0392b"/><circle cx="60" cy="45" r="14" fill="#c0392b"/><circle cx="90" cy="50" r="12" fill="#c0392b"/><circle cx="30" cy="50" r="5" fill="#fff"/><circle cx="60" cy="45" r="6" fill="#fff"/><circle cx="90" cy="50" r="5" fill="#fff"/><rect x="25" y="62" width="10" height="30" rx="2" fill="#c0392b"/><rect x="53" y="59" width="14" height="33" rx="2" fill="#c0392b"/><rect x="85" y="62" width="10" height="30" rx="2" fill="#c0392b"/></svg>`},
+  {label:'Pochita & Denji',bg:'#120808',svg:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="75" cy="50" r="20" fill="#7b1a12"/><circle cx="42" cy="60" r="22" fill="#c0392b"/><ellipse cx="42" cy="85" rx="16" ry="12" fill="#c0392b"/><circle cx="35" cy="55" r="4" fill="#fff"/><circle cx="49" cy="55" r="4" fill="#fff"/><circle cx="36" cy="55" r="2" fill="#111"/><circle cx="50" cy="55" r="2" fill="#111"/><rect x="34" y="63" width="16" height="7" rx="2" fill="#5a1208"/><rect x="36" y="60" width="3" height="5" rx="1" fill="#e74c3c"/><rect x="41" y="60" width="3" height="5" rx="1" fill="#e74c3c"/><rect x="46" y="60" width="3" height="5" rx="1" fill="#e74c3c"/><ellipse cx="75" cy="28" rx="6" ry="9" fill="#a93226" transform="rotate(-15 75 28)"/><ellipse cx="88" cy="30" rx="6" ry="9" fill="#a93226" transform="rotate(15 88 30)"/><circle cx="70" cy="45" r="3" fill="#fff"/><circle cx="80" cy="45" r="3" fill="#fff"/></svg>`},
+];
+
+const wall=document.getElementById('art-wall');
+artData.forEach(a=>{
+  const cell=document.createElement('div');
+  cell.className='art-cell';
+  cell.style.background=a.bg;
+  cell.innerHTML=a.svg+`<div class="art-cell-label">${a.label}</div>`;
+  wall.appendChild(cell);
+});
+
+/* ========= TRIVIA ========= */
+const questions=[
+  {q:'Qual contrato Pochita faz com Denji antes de morrer?',
+   opts:['Dar poderes de motosserra','Fundir seu coração com o de Denji','Tornar Denji imortal','Destruir os yakuza'],ans:1},
+  {q:'Por que os demônios do inferno temem tanto o Chainsaw Man?',
+   opts:['Porque ele é muito rápido','Porque devora demônios apagando-os da existência','Porque sangra sem parar','Porque pode voar'],ans:1},
+  {q:'Qual é o verdadeiro poder de Makima?',
+   opts:['Demônio do Fogo','Demônio da Morte','Demônio do Controle','Demônio do Futuro'],ans:2},
+  {q:'O que Power sacrificou para fazer seu contrato?',
+   opts:['Memórias','Nada ainda','Seu gato Meowy temporariamente','Sua visão'],ans:2},
+  {q:'Como Denji ativa suas motosserras?',
+   opts:['Gritando o nome de Pochita','Sendo banhado em sangue','Puxando a corrente que sai do peito','Recitando um encantamento'],ans:2},
+  {q:'Qual demônio Aki Hayakawa usa para fumar e lançar ataques?',
+   opts:['Demônio da Cobra','Demônio do Raposa','Demônio do Ouriço','Demônio do Futuro'],ans:1},
+  {q:'Em que publicação Chainsaw Man foi publicado originalmente?',
+   opts:['Monthly Shonen Jump','Shonen Jump+','Weekly Shonen Jump','Young Jump'],ans:2},
+  {q:'O que acontece com os demônios que o Chainsaw Man devora?',
+   opts:['Vão para o inferno','São absorvidos permanentemente','São apagados da existência humana','Tornam-se parte de Denji'],ans:2},
+  {q:'Qual personagem é conhecida como a "Primeira" caçadora de demônios?',
+   opts:['Himeno','Makima','Quanxi','Power'],ans:2},
+  {q:'Qual é o nome do gato de Power?',
+   opts:['Nyan','Pochita Jr.','Meowy','Kuro'],ans:2},
+];
+
+let tq=0,score=0,answered=false;
+const qArea=document.getElementById('q-area');
+const nextBtn=document.getElementById('q-next-btn');
+const scoreNum=document.getElementById('score-num');
+const totalNum=document.getElementById('total-num');
+
+function renderQ(){
+  if(tq>=questions.length){
+    qArea.innerHTML=`
+      <div class="final-score">
+        <div class="big">${score} <span style="font-size:3rem;color:var(--t3)">/</span> ${questions.length}</div>
+        <p>${score>=9?'🔥 LENDÁRIO! Você conhece Chainsaw Man como ninguém!':score>=7?'⚡ Excelente! Fã de verdade!':score>=5?'👊 Bom resultado! Mas pode melhorar!':score>=3?'🩸 Precisa reler o mangá...':'💀 Você nunca assistiu Chainsaw Man?'}</p>
+        <button class="replay-btn" onclick="restartQuiz()">↺ Jogar Novamente</button>
+      </div>`;
+    nextBtn.classList.remove('show');return;
+  }
+  answered=false;
+  const q=questions[tq];
+  const letters=['A','B','C','D'];
+  qArea.innerHTML=`
+    <div class="q-card">
+      <div class="q-number">PERGUNTA ${tq+1} DE ${questions.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-opts">
+        ${q.opts.map((o,i)=>`<button class="q-opt" onclick="answer(${i})"><span class="opt-letter">${letters[i]}</span>${o}</button>`).join('')}
+      </div>
+    </div>`;
+  nextBtn.classList.remove('show');
+}
+
+window.answer=function(i){
+  if(answered)return;answered=true;
+  const q=questions[tq];
+  document.querySelectorAll('.q-opt').forEach((b,bi)=>{
+    b.disabled=true;
+    if(bi===q.ans)b.classList.add('correct');
+    if(bi===i&&i!==q.ans)b.classList.add('wrong');
+  });
+  if(i===q.ans)score++;
+  scoreNum.textContent=score;totalNum.textContent=tq+1;
+  nextBtn.classList.add('show');
+};
+
+nextBtn.addEventListener('click',()=>{tq++;renderQ()});
+
+window.restartQuiz=function(){
+  tq=0;score=0;
+  scoreNum.textContent=0;totalNum.textContent=0;
+  renderQ();
+};
+
+renderQ();
+</script>
+</body>
+</html>
